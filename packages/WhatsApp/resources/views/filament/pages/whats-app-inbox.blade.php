@@ -128,7 +128,7 @@
                         <div class="flex {{ $msg->direction === 'outbound' ? 'justify-end' : 'justify-start' }}">
                             <div class="max-w-[75%] rounded-2xl px-4 py-2 text-xs shadow-sm {{ $msg->direction === 'outbound' ? 'bg-primary-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-none' }}">
                                 
-                                <!-- Message Header / Type -->
+                                <!-- Message Media -->
                                 @if($msg->media_url)
                                     @if(in_array($msg->type, ['image', 'sticker']))
                                         <img src="{{ $msg->media_url }}" class="rounded-lg max-h-48 mb-1 object-cover" />
@@ -149,7 +149,7 @@
                                     <span>{{ $msg->created_at->format('H:i') }}</span>
                                     @if($msg->direction === 'outbound')
                                         <span>
-                                            @if($msg->status === 'read') ✔️✔️ @elseif($msg->status === 'delivered') ✔️ @else ⏱️ @endif
+                                            @if($msg->status === 'read') ✔️✔️ @elseif($msg->status === 'delivered') ✔️ @elseif($msg->status === 'sent') 🚀 @else ⏱️ @endif
                                         </span>
                                     @endif
                                 </div>
@@ -175,7 +175,21 @@
                         </div>
                     @endif
 
+                    <!-- Attachment Preview Pill -->
+                    @if($attachment)
+                        <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg text-xs">
+                            <span>📎 {{ $attachment->getClientOriginalName() }}</span>
+                            <button type="button" wire:click="removeAttachment" class="text-red-500 font-bold hover:text-red-700">✖</button>
+                        </div>
+                    @endif
+
                     <form wire:submit.prevent="sendReply" class="flex items-center space-x-2">
+                        <!-- Paperclip File Attachment Input -->
+                        <label class="cursor-pointer p-2 rounded-lg text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <input type="file" wire:model="attachment" class="hidden" />
+                            <span class="text-base" title="Attach document, image, or media">📎</span>
+                        </label>
+
                         <textarea 
                             wire:model="replyText" 
                             rows="2" 
@@ -194,9 +208,10 @@
                             </button>
                             <button 
                                 type="submit" 
-                                class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                                class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center space-x-1"
                             >
-                                Send 🚀
+                                <span>Send</span>
+                                <span>🚀</span>
                             </button>
                         </div>
                     </form>

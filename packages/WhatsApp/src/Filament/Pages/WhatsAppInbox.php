@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace Relaticle\WhatsApp\Filament\Pages;
 
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Livewire\WithFileUploads;
 use Relaticle\WhatsApp\Jobs\SendWhatsAppMessageJob;
 use Relaticle\WhatsApp\Models\WhatsAppConversation;
 use Relaticle\WhatsApp\Models\WhatsAppMessage;
 use Relaticle\WhatsApp\Models\WhatsAppNote;
 use Relaticle\WhatsApp\Models\WhatsAppTag;
 use Relaticle\WhatsApp\Services\WhatsAppAIService;
+use Relaticle\WhatsApp\Services\WhatsAppCloudApiService;
 
 final class WhatsAppInbox extends Page
 {
+    use WithFileUploads;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static ?string $navigationLabel = 'WhatsApp Shared Inbox';
@@ -33,16 +39,17 @@ final class WhatsAppInbox extends Page
     // State properties
     public ?string $selectedConversationId = null;
     public string $searchQuery = '';
-    public string $selectedStatus = 'open'; // open, pending, resolved, archived
+    public string $selectedStatus = 'all'; // open, pending, resolved, archived, all
     public ?string $selectedTagId = null;
     public string $replyText = '';
+    public $attachment = null;
     public string $newNoteText = '';
     public ?string $aiSummary = null;
     public array $aiReplySuggestions = [];
 
     protected $queryString = [
         'selectedConversationId' => ['except' => ''],
-        'selectedStatus' => ['except' => 'open'],
+        'selectedStatus' => ['except' => 'all'],
     ];
 
     public function mount(): void
@@ -53,9 +60,16 @@ final class WhatsAppInbox extends Page
         }
     }
 
+    private function getTeamId(): ?string
+    {
+        return Filament::getTenant()?->getKey()
+            ?? Auth::user()?->currentTeam?->getKey()
+            ?? Auth::user()?->current_team_id;
+    }
+
     public function getConversationsProperty(): Collection
     {
-        $teamId = Auth::user()?->current_team_id;
+        $teamId = $this->getTeamId();
         if (!$teamId) {
             return collect();
         }
@@ -99,7 +113,7 @@ final class WhatsAppInbox extends Page
 
     public function getTagsProperty(): Collection
     {
-        $teamId = Auth::user()?->current_team_id;
+        $teamId = $this->getTeamId();
         return $teamId ? WhatsAppTag::where('team_id', $teamId)->get() : collect();
     }
 
@@ -114,18 +128,51 @@ final class WhatsAppInbox extends Page
         $this->selectedConversationId = $id;
         $this->aiSummary = null;
         $this->aiReplySuggestions = [];
+        $this->attachment = null;
+    }
+
+    public function removeAttachment(): void
+    {
+        $this->attachment = null;
     }
 
     public function sendReply(): void
     {
-        $this->validate([
-            'replyText' => 'required|string|min:1',
-        ]);
+        if (empty(trim($this->replyText)) && !$this->attachment) {
+            $this->validate([
+                'replyText' => 'required|string|min:1',
+            ]);
+            return;
+        }
 
         $conversation = $this->activeConversation;
         if (!$conversation) {
             return;
         }
+
+        $msgType = 'text';
+        $mediaUrl = null;
+        $mime = null;
+        $filename = null;
+
+        if ($this->attachment) {
+            $mime = $this->attachment->getMimeType();
+            $filename = $this->attachment->getClientOriginalName();
+            $msgType = 'document';
+
+            if (str_starts_with($mime, 'image/')) {
+                $msgType = 'image';
+            } elseif (str_starts_with($mime, 'video/')) {
+                $msgType = 'video';
+            } elseif (str_starts_with($mime, 'audio/')) {
+                $msgType = 'audio';
+            }
+
+            $path = $this->attachment->store('whatsapp-attachments', 'public');
+            $mediaUrl = asset('storage/' . $path);
+        }
+
+        $bodyText = !empty(trim($this->replyText)) ? trim($this->replyText) : ($filename ?? 'Attachment');
 
         $message = WhatsAppMessage::create([
             'team_id' => $conversation->team_id,
@@ -133,20 +180,32 @@ final class WhatsAppInbox extends Page
             'direction' => 'outbound',
             'sender_type' => 'user',
             'sender_user_id' => Auth::id(),
-            'type' => 'text',
-            'body' => $this->replyText,
+            'type' => $msgType,
+            'body' => $bodyText,
+            'media_url' => $mediaUrl,
+            'media_filename' => $filename,
+            'media_mime_type' => $mime,
             'status' => 'pending',
             'sent_at' => now(),
         ]);
 
         $conversation->update([
             'last_message_at' => now(),
-            'last_message_preview' => $this->replyText,
+            'last_message_preview' => $bodyText,
         ]);
 
+        // Immediate direct send via Meta Cloud API for instant real-time delivery
+        try {
+            (new SendWhatsAppMessageJob($message->id))->handle(app(WhatsAppCloudApiService::class));
+        } catch (\Throwable $e) {
+            Log::error("Direct Send Reply Error: {$e->getMessage()}", ['exception' => $e]);
+        }
+
+        // Also dispatch job for queue safety
         SendWhatsAppMessageJob::dispatch($message->id);
 
         $this->replyText = '';
+        $this->attachment = null;
 
         Notification::make()
             ->title('Message Sent')
