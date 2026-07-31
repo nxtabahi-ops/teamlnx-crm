@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\WhatsApp\Models;
 
-use App\Models\Concerns\BelongsToTeamCreator;
 use App\Models\Concerns\HasTeam;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -16,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class WhatsAppConversation extends Model
 {
-    use BelongsToTeamCreator;
     use HasFactory;
     use HasTeam;
     use HasUlids;
@@ -25,7 +23,6 @@ final class WhatsAppConversation extends Model
 
     protected $fillable = [
         'team_id',
-        'creator_id',
         'whatsapp_account_id',
         'whatsapp_contact_id',
         'assigned_user_id',

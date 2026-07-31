@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\WhatsApp\Models;
 
-use App\Models\Concerns\BelongsToTeamCreator;
 use App\Models\Concerns\HasTeam;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -14,7 +13,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class WhatsAppMessage extends Model
 {
-    use BelongsToTeamCreator;
     use HasFactory;
     use HasTeam;
     use HasUlids;
@@ -23,7 +21,6 @@ final class WhatsAppMessage extends Model
 
     protected $fillable = [
         'team_id',
-        'creator_id',
         'conversation_id',
         'wamid',
         'direction',
