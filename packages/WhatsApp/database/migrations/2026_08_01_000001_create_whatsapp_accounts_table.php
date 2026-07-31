@@ -10,7 +10,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('whatsapp_accounts', function (Blueprint $table): void {
+        if (! Schema::hasTable('whatsapp_accounts')) {
+            Schema::create('whatsapp_accounts', function (Blueprint $table): void {
             $table->ulid('id')->primary();
             $table->foreignUlid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUlid('creator_id')->nullable()->constrained('users')->nullOnDelete();
@@ -28,6 +29,7 @@ return new class extends Migration
 
             $table->index(['team_id', 'phone_number_id']);
         });
+        }
     }
 
     public function down(): void
