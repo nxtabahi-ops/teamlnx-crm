@@ -19,6 +19,16 @@ final class WhatsAppAccount extends Model
     use HasUlids;
     use SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $model): void {
+            if (auth()->check()) {
+                $model->creator_id ??= auth()->id();
+                $model->team_id ??= \Filament\Facades\Filament::getTenant()?->getKey() ?? auth()->user()?->currentTeam?->getKey();
+            }
+        });
+    }
+
     protected $table = 'whatsapp_accounts';
 
     protected $fillable = [

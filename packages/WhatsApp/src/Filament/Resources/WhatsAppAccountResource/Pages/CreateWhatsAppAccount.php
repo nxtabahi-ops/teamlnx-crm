@@ -10,4 +10,9 @@ use Relaticle\WhatsApp\Filament\Resources\WhatsAppAccountResource;
 final class CreateWhatsAppAccount extends CreateRecord
 {
     protected static string $resource = WhatsAppAccountResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
