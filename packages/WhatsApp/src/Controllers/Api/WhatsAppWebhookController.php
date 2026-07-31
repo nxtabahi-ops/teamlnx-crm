@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\WhatsApp\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,16 +11,16 @@ use Illuminate\Support\Facades\Log;
 use Relaticle\WhatsApp\Jobs\ProcessWhatsAppWebhookJob;
 use Relaticle\WhatsApp\Models\WhatsAppAccount;
 
-final class WhatsAppWebhookController extends Controller
+final class WhatsAppWebhookController
 {
     /**
      * Meta Webhook GET verification endpoint.
      */
     public function verify(Request $request, ?string $accountId = null): Response
     {
-        $mode = $request->query('hub_mode');
-        $token = $request->query('hub_verify_token');
-        $challenge = $request->query('hub_challenge');
+        $mode = $request->query('hub_mode') ?? $request->query('hub.mode');
+        $token = $request->query('hub_verify_token') ?? $request->query('hub.verify_token');
+        $challenge = $request->query('hub_challenge') ?? $request->query('hub.challenge');
 
         $account = null;
         if ($accountId) {
