@@ -94,6 +94,7 @@
             "Relaticle\\Documentation\\": "packages/Documentation/src",
             "Relaticle\\OnboardSeed\\": "packages/OnboardSeed/src",
             "Relaticle\\ImportWizard\\": "packages/ImportWizard/src",
+            "Relaticle\\WhatsApp\\": "packages/WhatsApp/src",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

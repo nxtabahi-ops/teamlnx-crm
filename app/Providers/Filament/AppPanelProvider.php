@@ -143,7 +143,9 @@ final class AppPanelProvider extends PanelProvider
                 fn (): View => view('filament.app.help-menu', ['items' => $this->supportMenuItems()]),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\Resources')
+            ->discoverResources(in: base_path('packages/WhatsApp/src/Filament/Resources'), for: 'Relaticle\\WhatsApp\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverPages(in: base_path('packages/WhatsApp/src/Filament/Pages'), for: 'Relaticle\\WhatsApp\\Filament\\Pages')
             ->discoverPages(in: base_path('packages/ImportWizard/src/Filament/Pages'), for: 'Relaticle\\ImportWizard\\Filament\\Pages')
             ->discoverPages(in: base_path('packages/Chat/src/Filament/Pages'), for: 'Relaticle\\Chat\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')

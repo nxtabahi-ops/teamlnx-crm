@@ -29,4 +29,6 @@ return [
     DocumentationServiceProvider::class,
     ImportWizardNewServiceProvider::class,
     SystemAdminPanelProvider::class,
+    Relaticle\WhatsApp\Providers\WhatsAppServiceProvider::class,
 ];
+
