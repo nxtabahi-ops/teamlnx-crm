@@ -22,7 +22,7 @@ final class WhatsAppBroadcastResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static ?string $navigationGroup = 'WhatsApp Settings';
+    protected static string|\UnitEnum|null $navigationGroup = 'WhatsApp Settings';
 
     protected static ?int $navigationSort = 3;
 

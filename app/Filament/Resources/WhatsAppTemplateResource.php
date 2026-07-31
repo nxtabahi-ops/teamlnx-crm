@@ -17,9 +17,9 @@ final class WhatsAppTemplateResource extends Resource
 {
     protected static ?string $model = WhatsAppTemplate::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static ?string $navigationGroup = 'WhatsApp Settings';
+    protected static string|\UnitEnum|null $navigationGroup = 'WhatsApp Settings';
 
     protected static ?string $navigationLabel = 'Message Templates';
 

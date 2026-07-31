@@ -20,7 +20,7 @@ final class WhatsAppTemplateResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static ?string $navigationGroup = 'WhatsApp Settings';
+    protected static string|\UnitEnum|null $navigationGroup = 'WhatsApp Settings';
 
     protected static ?int $navigationSort = 2;
 
