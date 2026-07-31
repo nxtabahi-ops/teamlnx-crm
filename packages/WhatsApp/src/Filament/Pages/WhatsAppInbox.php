@@ -39,7 +39,7 @@ final class WhatsAppInbox extends Page
     // State properties
     public ?string $selectedConversationId = null;
     public string $searchQuery = '';
-    public string $selectedStatus = 'all'; // open, pending, resolved, archived, all
+    public string $selectedStatus = 'all'; // all, open, pending, resolved, archived
     public ?string $selectedTagId = null;
     public string $replyText = '';
     public $attachment = null;
@@ -129,6 +129,7 @@ final class WhatsAppInbox extends Page
         $this->aiSummary = null;
         $this->aiReplySuggestions = [];
         $this->attachment = null;
+        $this->dispatch('scroll-to-bottom');
     }
 
     public function removeAttachment(): void
@@ -139,9 +140,6 @@ final class WhatsAppInbox extends Page
     public function sendReply(): void
     {
         if (empty(trim($this->replyText)) && !$this->attachment) {
-            $this->validate([
-                'replyText' => 'required|string|min:1',
-            ]);
             return;
         }
 
@@ -172,7 +170,7 @@ final class WhatsAppInbox extends Page
             $mediaUrl = asset('storage/' . $path);
         }
 
-        $bodyText = !empty(trim($this->replyText)) ? trim($this->replyText) : ($filename ?? 'Attachment');
+        $bodyText = !empty(trim($this->replyText)) ? trim($this->replyText) : ($filename ?? 'Media Attachment');
 
         $message = WhatsAppMessage::create([
             'team_id' => $conversation->team_id,
@@ -206,6 +204,8 @@ final class WhatsAppInbox extends Page
 
         $this->replyText = '';
         $this->attachment = null;
+
+        $this->dispatch('scroll-to-bottom');
 
         Notification::make()
             ->title('Message Sent')
@@ -253,7 +253,6 @@ final class WhatsAppInbox extends Page
         $conversation = $this->activeConversation;
         if ($conversation) {
             $conversation->update(['status' => $status]);
-            $this->selectedStatus = $status;
             Notification::make()->title("Status updated to {$status}")->success()->send();
         }
     }
