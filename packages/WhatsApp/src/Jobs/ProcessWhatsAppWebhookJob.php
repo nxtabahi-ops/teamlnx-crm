@@ -16,14 +16,33 @@ final class ProcessWhatsAppWebhookJob implements ShouldQueue
 
     public function __construct(
         public array $payload,
-        public string $accountId
+        public ?string $accountId = null
     ) {}
 
     public function handle(WebhookIngestionService $service): void
     {
-        $account = WhatsAppAccount::find($this->accountId);
-        if (!$account) {
-            Log::error("ProcessWhatsAppWebhookJob: WhatsApp account not found for ID {$this->accountId}");
+        $account = null;
+        if ($this->accountId) {
+            $account = WhatsAppAccount::find($this->accountId);
+        }
+
+        if (! $account) {
+            $wabaId = $this->payload['entry'][0]['id'] ?? null;
+            $phoneNumberId = $this->payload['entry'][0]['changes'][0]['value']['metadata']['phone_number_id'] ?? null;
+
+            if ($phoneNumberId) {
+                $account = WhatsAppAccount::where('phone_number_id', $phoneNumberId)->first();
+            }
+            if (! $account && $wabaId) {
+                $account = WhatsAppAccount::where('waba_id', $wabaId)->first();
+            }
+            if (! $account) {
+                $account = WhatsAppAccount::first();
+            }
+        }
+
+        if (! $account) {
+            Log::error('ProcessWhatsAppWebhookJob: No WhatsApp account found for payload.');
             return;
         }
 

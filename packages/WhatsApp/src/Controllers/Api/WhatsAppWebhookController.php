@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Relaticle\WhatsApp\Jobs\ProcessWhatsAppWebhookJob;
 use Relaticle\WhatsApp\Models\WhatsAppAccount;
+use Relaticle\WhatsApp\Services\WebhookIngestionService;
 
 final class WhatsAppWebhookController
 {
@@ -80,6 +81,16 @@ final class WhatsAppWebhookController
             }
         }
 
+        // Process message payload synchronously for zero latency
+        if ($account) {
+            try {
+                app(WebhookIngestionService::class)->processPayload($payload, $account);
+            } catch (\Throwable $e) {
+                Log::error("Webhook Ingestion Direct Error: {$e->getMessage()}", ['exception' => $e]);
+            }
+        }
+
+        // Also dispatch job for queue safety
         ProcessWhatsAppWebhookJob::dispatch($payload, $account?->id);
 
         return response()->json(['status' => 'success'], 200);
