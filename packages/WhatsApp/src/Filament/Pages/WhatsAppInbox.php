@@ -25,6 +25,11 @@ final class WhatsAppInbox extends Page
 
     protected string $view = 'whatsapp::filament.pages.whats-app-inbox';
 
+    public static function canAccess(): bool
+    {
+        return true;
+    }
+
     // State properties
     public ?string $selectedConversationId = null;
     public string $searchQuery = '';

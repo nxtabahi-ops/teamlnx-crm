@@ -24,6 +24,11 @@ final class WhatsAppTemplateResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
