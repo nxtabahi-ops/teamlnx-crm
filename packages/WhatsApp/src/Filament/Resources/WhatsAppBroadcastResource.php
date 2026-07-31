@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Relaticle\WhatsApp\Filament\Resources;
 
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Actions\Action;
