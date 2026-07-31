@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 
 final class WhatsAppInbox extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static ?string $navigationLabel = 'WhatsApp Shared Inbox';
 
