@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\WhatsApp\Providers;
 
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Relaticle\WhatsApp\Models\WhatsAppAccount;
 use Relaticle\WhatsApp\Models\WhatsAppTemplate;
