@@ -30,8 +30,3 @@ Route::prefix('v1')
 
         Route::get('custom-fields', [CustomFieldsController::class, 'index'])->name('custom-fields.index');
     });
-
-// Meta WhatsApp Cloud API Webhooks
-Route::get('whatsapp/webhook/{accountId}', [\App\Http\Controllers\Api\WhatsAppWebhookController::class, 'verify'])->name('whatsapp.webhook.verify');
-Route::post('whatsapp/webhook/{accountId}', [\App\Http\Controllers\Api\WhatsAppWebhookController::class, 'handle'])->name('whatsapp.webhook.handle');
-
