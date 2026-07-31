@@ -23,7 +23,7 @@ final class WhatsAppInbox extends Page
 
     protected static ?int $navigationSort = 1;
 
-    protected static string $view = 'whatsapp::filament.pages.whats-app-inbox';
+    protected string $view = 'whatsapp::filament.pages.whats-app-inbox';
 
     // State properties
     public ?string $selectedConversationId = null;
